@@ -73,8 +73,15 @@ export function PuzzleBeat({ stageKey, beat, beatIndex, isFragmentAnswer, hasPre
   const wrongTimer = useRef(null);
   useEffect(() => () => clearTimeout(wrongTimer.current), []);
 
-  const descText = useMemo(() => beat.descSegs.map((s) => s.text).join(''), [beat]);
+  // `introSegs` (optional) is plain narration shown ABOVE the terminal panel —
+  // for a page that reads as "story text, then a terminal device below it"
+  // rather than cramming everything into the terminal box. It types out
+  // first, then descSegs continues the same typewriter budget inside the panel.
+  const introSegs = beat.introSegs || [];
+  const introLen = useMemo(() => introSegs.reduce((n, s) => n + s.text.length, 0), [introSegs]);
+  const descText = useMemo(() => [...introSegs, ...beat.descSegs].map((s) => s.text).join(''), [beat]);
   const { count, done, skip } = useTypewriter(descText, { startDone });
+  const descCount = Math.max(0, count - introLen);
 
   const isKeypad = !isFragmentAnswer && !!beat.keypadInput;
   const isHiTech = !isFragmentAnswer && !isKeypad && !!beat.hiTechInput;
@@ -146,6 +153,12 @@ export function PuzzleBeat({ stageKey, beat, beatIndex, isFragmentAnswer, hasPre
     <div style={css('flex:1;display:flex;flex-direction:column;justify-content:flex-start;gap:18px;overflow-y:auto;min-height:0;padding:22px 2px 4px;')}>
       <div style={css('margin:auto 0;display:flex;flex-direction:column;gap:18px;')}>
 
+        {introSegs.length > 0 && (
+          <div style={css('font-size:19px;line-height:2.1;text-align:left;width:100%;')} onClick={() => { if (!done) skip(); }}>
+            <SegText segs={introSegs} count={count} cursorColor={count < introLen ? accent : null} paraMargin={16} />
+          </div>
+        )}
+
         {beat.descSegs.length > 0 && (
           <TerminalPanel
             accent={accent}
@@ -155,7 +168,7 @@ export function PuzzleBeat({ stageKey, beat, beatIndex, isFragmentAnswer, hasPre
             onClick={() => { if (!done) skip(); }}
             bodyStyle={{ padding: '20px 22px 24px', fontSize: 16, lineHeight: 2, textAlign: 'left', width: '100%', minHeight: 64 }}
           >
-            <SegText segs={beat.descSegs} count={count} cursorColor={done ? null : accent} accent={accent} />
+            <SegText segs={beat.descSegs} count={descCount} cursorColor={done ? null : accent} accent={accent} />
           </TerminalPanel>
         )}
 
