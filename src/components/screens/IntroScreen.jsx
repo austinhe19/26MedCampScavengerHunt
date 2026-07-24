@@ -58,7 +58,13 @@ export function IntroScreen({ onDone, pages = INTRO_PAGES, finalLabel = '進入�
             {body}
           </TerminalPanel>
         ) : (
-          <div style={css('margin:auto 0;font-size:19px;line-height:2.1;text-align:left;width:100%;')}>{body}</div>
+          <div
+            key={page.glitch ? pageIndex : undefined}
+            style={{
+              ...css('margin:auto 0;font-size:19px;line-height:2.1;text-align:left;width:100%;'),
+              animation: page.glitch ? 'glitchRGB 0.85s steps(1, end)' : 'none',
+            }}
+          >{body}</div>
         )}
       </div>
 

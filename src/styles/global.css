@@ -37,12 +37,16 @@ button { font-family: var(--font-ui); }
 /* CJK text wraps at any character boundary by default, so a paragraph can
  * easily leave just one or two orphaned characters dangling on their own
  * line. `pretty` avoids that (spreading the wrap points across the whole
- * block instead of pure greedy-fill) but only Chromium implements it;
- * `balance` is the fallback for browsers (Safari included) that don't —
- * an unrecognized VALUE drops only that one declaration, so browsers that
- * understand `pretty` use it, everyone else keeps `balance`. Same
- * two-declaration fallback pattern as the dvh/vh rule above. */
-.text-wrap-pretty { text-wrap: balance; text-wrap: pretty; }
+ * block instead of pure greedy-fill) with only a light touch on the overall
+ * wrap width. `balance` looked like the right fallback for browsers that
+ * don't support `pretty` (unrecognized values only drop their own
+ * declaration), but it turned out too aggressive for short paragraphs —
+ * on iPad Safari (which supports `balance` but not yet `pretty`), it was
+ * picking a much narrower wrap width than the container to keep line
+ * lengths even, leaving a large empty gap on the right. Better to just fall
+ * back to normal greedy wrapping (the property's initial value) than force
+ * that on every browser without `pretty`. */
+.text-wrap-pretty { text-wrap: pretty; }
 .magnetic-tilt {
   --mx: 0; --my: 0; --lift: 0px; --press: 1;
   transform: perspective(700px) rotateX(calc(var(--my) * -6deg)) rotateY(calc(var(--mx) * 6deg)) translateY(var(--lift)) scale(var(--press));
@@ -119,6 +123,22 @@ button:not(:disabled):active { filter: brightness(0.92); }
 @keyframes mapGlowPulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
 @keyframes glyphDrift { 0%, 100% { transform: translateY(0); opacity: 0.18; } 50% { transform: translateY(-10px); opacity: 0.4; } }
 @keyframes glitchShift { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-4px); } 40% { transform: translateX(3px); } 60% { transform: translateX(-2px); } 80% { transform: translateX(2px); } }
+/* Stronger "digital corruption" glitch: bigger stutter-step jitter plus a
+ * red/cyan chromatic-aberration split via layered text-shadow (mimics an RGB
+ * channel offset), settling back to normal by the end. */
+@keyframes glitchRGB {
+  0%, 100% { transform: translate(0, 0); text-shadow: none; }
+  6%  { transform: translate(-7px, 2px); text-shadow: -4px 0 rgba(255,45,110,0.9), 4px 0 rgba(50,255,225,0.9); }
+  12% { transform: translate(6px, -3px); text-shadow: 4px 0 rgba(255,45,110,0.9), -4px 0 rgba(50,255,225,0.9); }
+  18% { transform: translate(-5px, 1px); text-shadow: -3px 0 rgba(255,45,110,0.85), 3px 0 rgba(50,255,225,0.85); }
+  24% { transform: translate(0, -2px); text-shadow: none; }
+  30% { transform: translate(5px, 2px); text-shadow: 3px 0 rgba(255,45,110,0.8), -3px 0 rgba(50,255,225,0.8); }
+  36% { transform: translate(-6px, -1px); text-shadow: -4px 0 rgba(255,45,110,0.85), 4px 0 rgba(50,255,225,0.85); }
+  44% { transform: translate(0, 0); text-shadow: none; }
+  50% { transform: translate(-3px, 1px); text-shadow: -2px 0 rgba(255,45,110,0.6), 2px 0 rgba(50,255,225,0.6); }
+  58% { transform: translate(2px, -1px); text-shadow: 2px 0 rgba(255,45,110,0.5), -2px 0 rgba(50,255,225,0.5); }
+  66% { transform: translate(0, 0); text-shadow: none; }
+}
 @keyframes successRipple { 0% { transform: scale(0.9); opacity: 0.8; } 100% { transform: scale(1.6); opacity: 0; } }
 @keyframes recBlink { 0%, 60% { opacity: 1; } 61%, 100% { opacity: 0.15; } }
 @keyframes pipeCurrentH { 0% { background-position: -60% 0; } 100% { background-position: 160% 0; } }
